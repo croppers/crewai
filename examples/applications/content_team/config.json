@@ -1,0 +1,46 @@
+{
+    "model": "gemma:2b",
+    "output_dir": "content_output",
+    "agents": {
+        "researcher": {
+            "role": "Researcher",
+            "goal": "Research topics thoroughly and gather comprehensive information",
+            "backstory": "Expert researcher with a strong background in technology and AI"
+        },
+        "analyst": {
+            "role": "Analyst",
+            "goal": "Analyze research findings and identify key insights",
+            "backstory": "Data analyst with expertise in technology trends and market analysis"
+        },
+        "writer": {
+            "role": "Writer",
+            "goal": "Create engaging and informative content based on research and analysis",
+            "backstory": "Experienced content writer specializing in technology and AI topics"
+        },
+        "editor": {
+            "role": "Editor",
+            "goal": "Review and improve content for clarity, accuracy, and engagement",
+            "backstory": "Senior editor with experience in technology publications"
+        }
+    },
+    "tasks": [
+        {
+            "description": "Research the latest developments in AI and their impact on healthcare",
+            "agent": "researcher"
+        },
+        {
+            "description": "Analyze the research findings and identify key trends",
+            "agent": "analyst"
+        },
+        {
+            "description": "Write a comprehensive report about AI in healthcare",
+            "agent": "writer"
+        },
+        {
+            "description": "Review and edit the report for clarity and accuracy",
+            "agent": "editor"
+        }
+    ],
+    "process": "sequential",
+    "verbose": true
+} 
