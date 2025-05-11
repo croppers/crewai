@@ -1,13 +1,6 @@
-"""
-Example of creating a custom agent with custom tools.
-This demonstrates how to extend agent capabilities with custom tools.
-"""
-
-from crewai import Agent, Task, Crew
-# from crewai_tools import BaseTool # Not strictly needed if only using @tool decorator
+from crewai import Agent, Crew, Task
 from langchain_community.llms import Ollama
-# from langchain.tools import Tool # We will use crewai's @tool instead
-from crewai.tools import tool # Correct import for @tool
+from crewai.tools import tool
 import requests
 from bs4 import BeautifulSoup
 from typing import List, Dict, Any
@@ -15,76 +8,44 @@ import json
 
 @tool("WebSearchTool")
 def search_web(query: str) -> str:
-    """Search the web for information about a topic.Input is the search query.
     """
-    try:
-        # This is a placeholder implementation
-        # In a real application, you would use a proper search API
-        return f"Search results for: {query}\n" + \
-               "1. Example result 1\n" + \
-               "2. Example result 2\n" + \
-               "3. Example result 3"
-    except Exception as e:
-        return f"Error performing web search: {str(e)}"
-
-@tool("DataAnalysisTool")
-def analyze_data(data: str, metrics: str) -> str: # Simplified for example, adjust as needed
-    """Analyze data and generate insights based on specified metrics. Input is a JSON string of data and a comma-separated string of metrics.
+    Search the web for the given query and return the first result.
     """
-    try:
-        # This is a placeholder implementation
-        # In a real application, you would parse the data string (e.g., json.loads(data))
-        # and the metrics string (e.g., metrics.split(','))
-        analysis = {
-            "parsed_data": data, # Placeholder
-            "parsed_metrics": metrics, # Placeholder
-            "summary": "Sample analysis summary",
-            "recommendations": ["Sample recommendation 1", "Sample recommendation 2"]
-        }
-        return json.dumps(analysis, indent=2)
-    except Exception as e:
-        return f"Error analyzing data: {str(e)}"
+    url = f"https://www.google.com/search?q={query}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    result = soup.find('h3').text
+    return result
 
-def main():
-    # Initialize Ollama
-    llm = Ollama(model="ollama/gemma:2b")
-    
-    # Create custom tools
-    # The tools are now automatically registered by the @tool decorator
-    # and can be directly assigned to the agent if they are in the same scope
-    # or imported if defined elsewhere.
-    # For simplicity, we'll rely on them being in scope or explicitly pass them if needed.
-    # CrewAI agents will discover tools available in the current context if not explicitly passed.
-    # tools = [search_web, analyze_data] # This is how you'd typically pass them if needed by older versions or for clarity
-    
-    # Create agent with custom tools
-    agent = Agent(
-        role='Research Analyst',
-        goal='Analyze and research topics thoroughly using available tools',
-        backstory='Expert analyst with strong research and data analysis skills',
-        llm=llm,
-        tools=[search_web, analyze_data], # Pass the functions directly
-        verbose=True
-    )
-    
-    # Create and execute tasks
-    research_task = Task(
-        description="Research the latest developments in quantum computing and analyze the findings",
-        agent=agent,
-        expected_output="A comprehensive report on the latest developments in quantum computing, including an analysis of the findings."
-    )
-    
-    # Create a crew to execute the task
-    crew = Crew(
-        agents=[agent],
-        tasks=[research_task],
-        verbose=True
-    )
-    
-    result = crew.kickoff()
-    
-    print("\nTask Result:")
-    print(result)
+llm = Ollama(model="ollama/gemma:2b")
 
-if __name__ == "__main__":
-    main() 
+# Create some agents...
+researcher_agent = Agent(
+    role='Researcher',
+    goal='Research and analyze topics effectively',
+    backstory='You are a researcher. You will be given a topic to research and analyze. You will provide a summary of your findings. You are a very informal researcher and you like to explain things in a down-to-earth way! So, be relaxed and chill with your explanations.',
+    llm=llm,
+    tools=[search_web],
+    verbose=True,
+)
+
+# Create the tasks...
+research_task = Task(
+    description="Research the latest developments in quantum computing and analyze the findings.",
+    agent=researcher_agent,
+    expected_output="A comprehensive report on the latest quantum computing developments.",
+)
+
+
+# Create the crew...
+crew = Crew(
+    agents=[researcher_agent],
+    tasks=[research_task],
+    verbose=True,
+)
+
+# Kick off the crew...
+result = crew.kickoff()
+print(result)
