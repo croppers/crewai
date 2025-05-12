@@ -50,7 +50,6 @@ ollama pull gemma:2b
   - Advanced Agent Development
   - Building Complex Crews
   - Real-World Application Development
-  - Production & Beyond
 
 ## Code Examples
 All code examples are organized in the `examples` directory:

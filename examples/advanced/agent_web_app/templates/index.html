@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Chatbot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <header>
+    <h1>Research Chatbot</h1>
+  </header>
+  <main>
+    <div class="chat-container">
+      <div class="input-area">
+        <input type="text" id="query" placeholder="Enter your research query (e.g. AI in healthcare)..." />
+        <button id="search-btn">Search</button>
+      </div>
+      <div class="chat-area" id="chat-area">
+        <!-- The model's summary (chat response) will be inserted here. -->
+      </div>
+    </div>
+    <div class="search-container">
+      <h2>Search Results</h2>
+      <pre id="search-results" style="white-space: pre-wrap; overflow-x: auto; background: #f5f5f5; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 14px; line-height: 1.5; margin: 0; border: 1px solid #ddd; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"></pre>
+    </div>
+  </main>
+  <script>
+    (function() {
+      var queryInput = document.getElementById("query");
+      var searchBtn = document.getElementById("search-btn");
+      var chatArea = document.getElementById("chat-area");
+      var searchResults = document.getElementById("search-results");
+      searchBtn.addEventListener("click", function() {
+        var query = queryInput.value.trim();
+        if (!query) {
+          alert("Please enter a query.");
+          return;
+        }
+        // Disable the button (and optionally show a spinner) while waiting for the response.
+         searchBtn.disabled = true;
+         searchBtn.textContent = "Searching...";
+         var xhr = new XMLHttpRequest();
+         xhr.open("POST", "/search", true);
+         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+         xhr.onreadystatechange = function() {
+           if (xhr.readyState === 4) {
+             searchBtn.disabled = false;
+             searchBtn.textContent = "Search";
+             if (xhr.status === 200) {
+               var resp = JSON.parse(xhr.responseText);
+               // Insert the model's summary (chat response) into the chat area.
+               chatArea.innerHTML = "<p class='chat-response'>" + resp.summary + "</p>";
+               // Insert the raw search results (as a pre block) into the search area.
+               searchResults.textContent = resp.search_results;
+             } else {
+               alert("Error: " + xhr.statusText);
+             }
+           }
+         };
+         xhr.send("query=" + encodeURIComponent(query));
+      });
+    })();
+  </script>
+</body>
+</html> 

@@ -1,0 +1,5 @@
+# Ignore .env (for API keys) and serper_raw_output.txt (for debug output) for security
+.env
+serper_raw_output.txt 
+# Ignore macOS system files
+.DS_Store 
